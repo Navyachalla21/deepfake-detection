@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard-header mt-4">
+  <h2>Welcome, <span class="text-gradient">{{ session.username }}</span></h2>
+  <p>Upload a file to securely analyze it for deepfake artifacts.</p>
+</div>
+
+{% if not (status.image and status.audio) %}
+<div class="notice mt-3">
+  <i class="fa-solid fa-triangle-exclamation"></i>
+  <div>
+    {% if not status.image %}<p><strong>Image and video models are not trained yet.</strong> Run <code>python -m train.train_image</code>.</p>{% endif %}
+    {% if not status.audio %}<p><strong>The audio model is not trained yet.</strong> Run <code>python -m train.train_audio</code>.</p>{% endif %}
+    <p class="text-sm">Until then those tabs will show an error instead of guessing. See README, steps 4 and 5.</p>
+  </div>
+</div>
+{% endif %}
+
+<div class="dashboard-grid mt-4">
+  <!-- Left: uploader -->
+  <div class="upload-panel glass-panel">
+    <h3 class="panel-title"><i class="fa-solid fa-cloud-arrow-up"></i> Detection Studio</h3>
+    <div class="media-tabs mt-3">
+      <button type="button" class="tab-btn active" data-type="image"><i class="fa-solid fa-image"></i> Image</button>
+      <button type="button" class="tab-btn" data-type="video"><i class="fa-solid fa-video"></i> Video</button>
+      <button type="button" class="tab-btn" data-type="audio"><i class="fa-solid fa-music"></i> Audio</button>
+    </div>
+    <form id="upload-form" enctype="multipart/form-data">
+      <input type="hidden" name="media_type" id="media-type" value="image">
+      <div class="drop-zone" id="drop-zone">
+        <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+        <h4 class="mt-2">Drag &amp; Drop file here</h4>
+        <p>or</p>
+        <label for="file-input" class="btn-outline btn-small mt-2">Browse Files</label>
+        <input type="file" id="file-input" name="file" accept=".jpg,.jpeg,.png,.webp" hidden>
+        <p class="file-info mt-2" id="file-info">No file selected.</p>
+      </div>
+      <button type="submit" class="btn-primary w-100 mt-4" id="analyze-btn" disabled>
+        <i class="fa-solid fa-magnifying-glass"></i> Analyze Media
+      </button>
+    </form>
+    <div id="loading-state" class="hidden mt-4 text-center">
+      <div class="spinner"></div>
+      <p class="mt-2" id="loading-text">Analyzing...</p>
+      <div class="progress-bar-container mt-2"><div class="progress-bar indeterminate"></div></div>
+    </div>
+    <div id="error-box" class="error-box hidden mt-3"></div>
+  </div>
+
+  <!-- Right: results + history -->
+  <div class="results-panel glass-panel">
+    <h3 class="panel-title"><i class="fa-solid fa-chart-pie"></i> Analysis Results</h3>
+
+    <div id="media-preview-container" class="hidden mt-3 text-center preview-box">
+      <p class="text-sm mb-2"><i class="fa-solid fa-eye"></i> Selected Media Preview:</p>
+      <div id="media-preview"></div>
+    </div>
+
+    <div id="result-container" class="hidden mt-3">
+      <div class="result-card">
+        <div class="result-header">
+          <h4 id="result-label" class="result-stamp">UNKNOWN</h4>
+          <div class="result-meta">
+            <span id="media-type-badge" class="media-badge">IMAGE</span>
+            <span id="processing-time" class="processing-time">--</span>
+          </div>
+        </div>
+        <p id="low-conf" class="low-conf hidden"><i class="fa-solid fa-circle-question"></i> Low confidence: treat as inconclusive.</p>
+
+        <div class="confidence-section mt-3">
+          <p>Confidence Score</p>
+          <div class="confidence-bar-bg"><div id="confidence-bar" class="confidence-bar-fill"></div></div>
+          <p id="confidence-text" class="text-right mt-1 font-bold">0%</p>
+        </div>
+
+        <div class="enhanced-details mt-3">
+          <h5><i class="fa-solid fa-microscope"></i> Enhanced Analysis</h5>
+          <div id="temporal-analysis" class="analysis-section hidden">
+            <p class="analysis-title"><i class="fa-solid fa-film"></i> Temporal Analysis</p>
+            <div class="analysis-data">
+              <span>Frames Analyzed: <strong id="frames-analyzed">--</strong></span>
+              <span>Temporal Consistency: <strong id="temporal-score">--</strong></span>
+            </div>
+          </div>
+          <div id="acoustic-analysis" class="analysis-section hidden">
+            <p class="analysis-title"><i class="fa-solid fa-wave-square"></i> Acoustic Analysis</p>
+            <div class="analysis-data">
+              <span>Acoustic Score (P fake): <strong id="acoustic-score">--</strong></span>
+              <span>Features: <strong id="features-used">--</strong></span>
+            </div>
+            <img id="spectrogram" class="spectrogram hidden" alt="Mel spectrogram">
+          </div>
+          <div id="preprocessing-info" class="analysis-section hidden">
+            <p class="analysis-title"><i class="fa-solid fa-sliders"></i> Preprocessing Applied</p>
+            <div class="analysis-data">
+              <span>Enhancement: <strong id="enhancement-status">--</strong></span>
+              <span>Processing Time: <strong id="preprocessing-time">--</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="details-section mt-3">
+          <h5><i class="fa-solid fa-circle-info"></i> Model Insights</h5>
+          <p id="result-details" class="text-sm mt-1">Waiting for details...</p>
+          <div id="feature-analysis" class="feature-analysis hidden mt-2">
+            <p class="feature-title">Feature Breakdown:</p>
+            <div id="feature-breakdown" class="feature-grid"></div>
+          </div>
+        </div>
+
+        <div id="frame-analysis" class="frame-analysis hidden mt-3">
+          <h5><i class="fa-solid fa-layer-group"></i> Frame-by-Frame Analysis</h5>
+          <div id="frame-breakdown" class="frame-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="empty-result" class="empty-state mt-4">
+      <i class="fa-solid fa-clipboard-question empty-icon"></i>
+      <p>Upload a file to see the analysis results here.</p>
+    </div>
+
+    <h3 class="panel-title mt-5"><i class="fa-solid fa-clock-rotate-left"></i> Recent Scans</h3>
+    <div class="history-list mt-3" id="history-list">
+      <p class="text-sm text-center mt-3" style="color:#aaa;">Loading...</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+{% endblock %}

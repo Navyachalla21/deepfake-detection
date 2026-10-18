@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero-section">
+  <div class="hero-content">
+    <h1 class="hero-title">Deepfake <span class="text-gradient">Detection</span></h1>
+    <p class="hero-subtitle">Machine learning models that check images, videos and audio for signs of
+      synthetic manipulation, with a confidence score and a history of every scan.</p>
+    <div class="hero-buttons">
+      <a href="{{ url_for('register') }}" class="btn-primary btn-large">Get Started Now <i class="fa-solid fa-arrow-right"></i></a>
+      <a href="#features" class="btn-outline btn-large">Learn More</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="scanner-box">
+      <div class="scanner-image"><i class="fa-regular fa-image" style="font-size: 8rem; color: rgba(255,255,255,0.2);"></i></div>
+      <div class="scanner-line"></div>
+      <div class="scanner-data">
+        <p class="text-sm" style="color:#888;">Example output</p>
+        <p>Authenticity Check: <span class="text-red">98% FAKE</span></p>
+        <p>Artifacts: Detected</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" class="features-section">
+  <h2 class="section-title">Multimodal <span class="text-gradient">Detection</span></h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fa-solid fa-image"></i></div>
+      <h3>Image Analysis</h3>
+      <p>A CNN fine-tuned on real and GAN-generated faces looks for spatial artifacts in a cropped face region.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fa-solid fa-video"></i></div>
+      <h3>Video Decoding</h3>
+      <p>Frames are sampled with OpenCV, scored one by one, and combined with a temporal consistency measure.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon"><i class="fa-solid fa-microphone-lines"></i></div>
+      <h3>Audio Forensics</h3>
+      <p>MFCC and spectral features extracted with librosa feed a classifier trained on real and synthetic voices.</p>
+    </div>
+  </div>
+</section>
+{% endblock %}

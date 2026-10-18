@@ -1,0 +1,11 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+instance/
+uploads/*
+!uploads/.gitkeep
+kaggle_datasets/*/*/*
+!kaggle_datasets/*/*/.gitkeep
+.vscode/

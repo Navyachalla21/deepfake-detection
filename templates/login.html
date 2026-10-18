@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="auth-container">
+  <div class="auth-card glass-panel">
+    <h2 class="auth-title">Welcome <span class="text-gradient">Back</span></h2>
+    <p class="auth-desc">Log in to upload and analyze media.</p>
+    <form action="{{ url_for('login') }}" method="POST" class="auth-form">
+      <div class="input-group">
+        <label for="email"><i class="fa-solid fa-envelope"></i> Email Address</label>
+        <input type="email" id="email" name="email" required placeholder="john@example.com">
+      </div>
+      <div class="input-group">
+        <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+        <input type="password" id="password" name="password" required placeholder="Your password">
+      </div>
+      <button type="submit" class="btn-primary w-100 mt-3">Secure Log In</button>
+    </form>
+    <p class="auth-footer mt-4 text-center">Don't have an account? <a href="{{ url_for('register') }}" class="text-link">Sign Up</a></p>
+  </div>
+</div>
+{% endblock %}

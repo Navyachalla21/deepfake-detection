@@ -1,0 +1,3 @@
+# Only install these if you actually use MongoDB or S3 (see .env.example)
+pymongo>=4.6
+boto3>=1.34
